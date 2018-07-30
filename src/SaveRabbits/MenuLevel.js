@@ -11,6 +11,10 @@ function MenuLevel() {
     this.kChoiceTexture = "assets/Choice.png";
 //    this.kAboutUsTexture = "";
 
+    this.aBgClip = "assets/sounds/bgClip.mp3";
+    this.aChooseCue = "assets/sounds/choose.mp3";
+    this.aEnterCue = "assets/sounds/focus.mp3";
+    
     this.mBgTexture = null;
     this.mTitleTexture = null;
     this.mStartTexture = null;
@@ -76,6 +80,9 @@ MenuLevel.prototype.initialize = function () {
     this.mChoiceTexture = new TextureRenderable(this.kChoiceTexture);
     this.mChoiceTexture.getXform().setSize(10, 10);
     this.mChoiceTexture.getXform().setPosition(75, 400);
+     //audio
+    gEngine.AudioClips.playBackgroundAudio(this.aBgClip);
+   
 };
 MenuLevel.prototype.loadScene = function () {
     // Load scene
@@ -87,9 +94,19 @@ MenuLevel.prototype.loadScene = function () {
     gEngine.Textures.loadTexture(this.kChoiceTexture);
     gEngine.Textures.loadTexture(this.kAboutUsTexture);
 
+ ///audio
+    gEngine.AudioClips.loadAudio(this.aBgClip);
+    gEngine.AudioClips.loadAudio(this.aChooseCue);
+    gEngine.AudioClips.loadAudio(this.aEnterCue);
+//    gEngine.AudioClips.loadAudio(this.aChooseCue);
+//    gEngine.AudioClips.loadAudio(this.aChooseCue);
+//    gEngine.AudioClips.loadAudio(this.aChooseCue);
+
 };
 
 MenuLevel.prototype.unloadScene = function () {
+    //stop bg music
+    gEngine.AudioClips.stopBackgroundAudio();
     // 卸载场景
     gEngine.LayerManager.cleanUp();
     gEngine.Textures.unloadTexture(this.kBgTexture);
@@ -98,6 +115,11 @@ MenuLevel.prototype.unloadScene = function () {
     gEngine.Textures.unloadTexture(this.kNewPlayerTexture);
     gEngine.Textures.unloadTexture(this.kChoiceTexture);
     gEngine.Textures.unloadTexture(this.kAboutUsTexture);
+    //audio
+    gEngine.AudioClips.unloadAudio(this.aBgClip);
+    gEngine.AudioClips.unloadAudio(this.aChooseCue);
+    gEngine.AudioClips.unloadAudio(this.aEnterCue);
+
 //    var win = new winLevel();
 //    gEngine.Core.startScene(win);
 
@@ -123,10 +145,12 @@ MenuLevel.prototype.update = function () {
     //gEngine.Physics.processObjSet(this.SpaceShip, this.mAllWalls);
     //next tip
     if (gEngine.Input.isKeyClicked(gEngine.Input.keys.Enter)) {
+        gEngine.AudioClips.playACue(this.aEnterCue);
         this.confirm(this.Choice);
         gEngine.GameLoop.stop();
     }
     if (gEngine.Input.isKeyClicked((gEngine.Input.keys.Down))) {
+        gEngine.AudioClips.playACue(this.aChooseCue);
         if (this.Choice < 3)
             this.Choice++;
         var curPos = this.mChoiceTexture.getXform().getPosition();
@@ -134,6 +158,7 @@ MenuLevel.prototype.update = function () {
             this.mChoiceTexture.getXform().setPosition(curPos[0], curPos[1] - 10);
     }
     if (gEngine.Input.isKeyClicked((gEngine.Input.keys.Up))) {
+        gEngine.AudioClips.playACue(this.aChooseCue);
         if (this.Choice > 1)
             this.Choice--;
         var curPos = this.mChoiceTexture.getXform().getPosition();

@@ -153,15 +153,16 @@
     <Bloodpack PosX="480" PosY="150" Width="14" Height="14" />
     <Bloodpack PosX="140" PosY="325" Width="14" Height="14" />
     <Bloodpack PosX="180" PosY="30" Width="14" Height="14" />
+    
 
     <Boom PosX="450" PosY="280" Width="14" Height="14" />
     <Boom PosX="480" PosY="335" Width="14" Height="14" />
     <Boom PosX="400" PosY="370" Width="14" Height="14" />    
     <Boom PosX="425" PosY="330" Width="14" Height="14" />
     <Boom PosX="167" PosY="400" Width="7" Height="7" />    
-    <Boom PosX="475" PosY="100" Width="7" Height="7" />    
+    <Boom PosX="465" PosY="100" Width="7" Height="7" />    
     <Boom PosX="360" PosY="310" Width="14" Height="14" />        
-    <Boom PosX="322" PosY="455" Width="7" Height="7" />
+    <Boom PosX="322" PosY="445" Width="7" Height="7" />
     <Boom PosX="302" PosY="185" Width="7" Height="7" />           
 </MyGameLevel>
     

@@ -12,6 +12,7 @@ function LaserMinion(atX, atY,  texture, w, h, state ) {
     this.mRange = 48;
     this.mStopRange = 32;
     this.state = state;
+    this.kBulletTexture = "assets/jetpack.png";
     Minion.call(this, atX, atY, texture, w, h);
     if(this.state ==1)
     {
@@ -27,7 +28,7 @@ gEngine.Core.inheritPrototype(LaserMinion,Minion);
 LaserMinion.prototype.update = function () {
     Minion.prototype.update.call(this);
     var b,direct,rotate;
-    if(this.state ==1)
+    if(this.state == 1)
     {
         direct = [Math.cos(Math.PI/4),Math.sin(Math.PI/4)];
         rotate = 45;
@@ -39,7 +40,7 @@ LaserMinion.prototype.update = function () {
         this.mNumCycles++;
         if(this.mNumCycles > this.kShootTimer){
             this.mNumCycles = 0;
-            b = new Bullets(this.getXform().getXPos(), this.getXform().getYPos(),direct,rotate );
+            b = new Bullets(this.getXform().getXPos(), this.getXform().getYPos(),direct,rotate,this.kBulletTexture);
             this.mProjectiles.addToSet(b);
         }
     this.HP = 3;

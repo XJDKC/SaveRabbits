@@ -44,8 +44,8 @@
 
 "use strict";
 
-function Bullets(atX, atY, velocity, radius) {
-    this.kTexture = "assets/jetpack.png";
+function Bullets(atX, atY, velocity, radius,Texture) {
+    this.kTexture = Texture;
     this.kSpeed = 20;
     this.damage = 1;
 

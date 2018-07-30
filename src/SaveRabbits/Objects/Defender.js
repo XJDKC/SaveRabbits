@@ -38,6 +38,7 @@ Defender.prototype.update = function ()
     if (this.OnWork != null)
     {
         var theta = 2;
+        this.DefenderRender.setColor([0,1,0,0.3]);
         if (gEngine.Input.isKeyPressed(this.OnWork.Control.Left))
         {
             this.mDirect+=theta;
@@ -49,6 +50,7 @@ Defender.prototype.update = function ()
         if (gEngine.Input.isKeyClicked(this.OnWork.Control.Leave))
         {
             this.OnWork = null;
+            this.DefenderRender.setColor([0,1,0,0]);
         }
         this.mDirect =(this.mDirect+360)%360;
     }

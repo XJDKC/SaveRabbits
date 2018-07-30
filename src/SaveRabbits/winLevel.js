@@ -10,7 +10,7 @@ function winLevel() {
     this.mContentTexture = null;
     this.mwinTexture = null;
     this.mCamera = null;
-    
+    this.aBgClip = "assets/sounds/bgClip.mp3";
     //roll speed
     this.rollSpeed = 1/9;
     //场景切换，return to main interface
@@ -48,6 +48,8 @@ winLevel.prototype.initialize = function () {
     this.mwinTexture = new TextureRenderable(this.winTexture);
     this.mwinTexture.getXform().setSize(60,30);
     this.mwinTexture.getXform().setPosition(100,405);
+    
+        gEngine.AudioClips.playBackgroundAudio(this.aBgClip);
 };
 winLevel.prototype.loadScene = function () {
     // Load scene
@@ -55,14 +57,20 @@ winLevel.prototype.loadScene = function () {
     gEngine.Textures.loadTexture(this.kBgTexture);
     gEngine.Textures.loadTexture(this.kContentTexture);
     gEngine.Textures.loadTexture(this.winTexture);
+        gEngine.AudioClips.loadAudio(this.aBgClip);
 };
 
 winLevel.prototype.unloadScene = function () {
     // 卸载场景
+    
+         //stop bg music
+    gEngine.AudioClips.stopBackgroundAudio();
     gEngine.LayerManager.cleanUp();
     gEngine.Textures.unloadTexture(this.kBgTexture);
     gEngine.Textures.unloadTexture(this.kContentTexture);
     gEngine.Textures.unloadTexture(this.winTexture);    
+    
+        gEngine.AudioClips.unloadAudio(this.aBgClip);
     if (this.Menu === true) {
         var nextLevel = new MenuLevel();
         gEngine.Core.startScene(nextLevel);

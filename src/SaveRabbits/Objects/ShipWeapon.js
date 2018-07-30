@@ -11,6 +11,7 @@ function ShipWeapon(Cheat,direct,GunBarrel,GunBase)
     this.OnWork = null;
     this.kShootTimer = 15;
     this.mNumCycles = 15;
+    this.kbulletTexture = "assets/jetpack.png";
     this.mProjectiles = new ParticleGameObjectSet();
 
     var pos = this.Cheat.getRigidBody().getCenter();
@@ -37,11 +38,14 @@ gEngine.Core.inheritPrototype(ShipWeapon,GameObject);
 
 ShipWeapon.prototype.update = function ()
 {
+    var audio = "assets/sounds/shoot.mp3";
     var pos = this.Cheat.getRigidBody().getCenter();
     var radius = this.Cheat.getRigidBody().getRadius();
     if (this.OnWork != null)
     {
-        var theta = 2;
+        var theta = 2.5;
+        this.mGunBaseRender.setColor([1,0,0,0.3]);
+        this.mGunBarrelRender.setColor([1,0,0,0.3]);
         if (gEngine.Input.isKeyPressed(this.OnWork.Control.Left))
         {
             if (theta + this.Angle <= 90)
@@ -61,7 +65,9 @@ ShipWeapon.prototype.update = function ()
                 var vy = Math.sin(Math.PI*(this.Angle+this.mDirect)/180);
                 var x = this.getXform().getXPos() + radius*vx/4;
                 var y = this.getXform().getYPos() + radius*vy/4;
-                var b = new Bullets(x , y, [ vx, vy], this.Angle+this.mDirect);
+                var b = new Bullets(x , y, [ vx, vy], this.Angle+this.mDirect,this.kbulletTexture);
+                gEngine.AudioClips.playACue(audio);
+                b.getRenderable().getXform().setSize(4,4);
                 this.mProjectiles.addToSet(b);
                 this.mNumCycles = 0;
             }
@@ -69,6 +75,8 @@ ShipWeapon.prototype.update = function ()
         if (gEngine.Input.isKeyClicked(this.OnWork.Control.Leave))
         {
             this.OnWork = null;
+            this.mGunBaseRender.setColor([1,0,0,0]);
+            this.mGunBarrelRender.setColor([1,0,0,0]);
         }
     }
 

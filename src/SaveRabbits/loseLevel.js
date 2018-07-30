@@ -10,7 +10,7 @@ function loseLevel() {
     this.mContentTexture = null;
     this.mloseTexture = null;
     this.mCamera = null;
-
+    this.aBgClip = "assets/sounds/bgClip.mp3";
     //roll speed
     this.rollSpeed = 1 / 9;
     //场景切换，return to main interface
@@ -47,20 +47,29 @@ loseLevel.prototype.initialize = function () {
     this.mloseTexture = new TextureRenderable(this.kloseTexture);
     this.mloseTexture.getXform().setSize(60, 30);
     this.mloseTexture.getXform().setPosition(100, 405);
+    
+        gEngine.AudioClips.playBackgroundAudio(this.aBgClip);
 };
 loseLevel.prototype.loadScene = function () {
     // Load scene
     gEngine.Textures.loadTexture(this.kBgTexture);
     gEngine.Textures.loadTexture(this.kContentTexture);
     gEngine.Textures.loadTexture(this.kloseTexture);
+    
+        gEngine.AudioClips.loadAudio(this.aBgClip);
 };
 
 loseLevel.prototype.unloadScene = function () {
     // 卸载场景
+    
+         //stop bg music
+    gEngine.AudioClips.stopBackgroundAudio();
     gEngine.LayerManager.cleanUp();
     gEngine.Textures.unloadTexture(this.kBgTexture);
     gEngine.Textures.unloadTexture(this.kContentTexture);
     gEngine.Textures.unloadTexture(this.kloseTexture);
+    
+        gEngine.AudioClips.unloadAudio(this.aBgClip);
     if (this.Menu === true) {
         var nextLevel = new MenuLevel();
         gEngine.Core.startScene(nextLevel);

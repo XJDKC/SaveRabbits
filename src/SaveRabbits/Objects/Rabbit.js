@@ -4,11 +4,12 @@
 /* find out more about jslint: http://www.jslint.com/help.html */
 
 "use strict";  // Operate in Strict mode such that variables must be declared before used!
-function Rabbit(SpaceShip,TEXTURE,atX,atY) {
+function Rabbit(SpaceShip,TEXTURE,atX,atY,TexPos) {
     this.SpaceShip = SpaceShip;
     this.Cheat = this.SpaceShip.Cheat;
 
     this.RelaPos = [atX,atY];
+    this.TexPos = TexPos;
 
     this.mState = Rabbit.eHeroState.eMove;
 
@@ -22,6 +23,7 @@ function Rabbit(SpaceShip,TEXTURE,atX,atY) {
 
     this.Control = null;
 
+
     var pos = this.Cheat.getXform().getPosition();
     var radius = this.Cheat.getRigidBody().getRadius();
     var Rabbit1 = new SpriteAnimateRenderable(TEXTURE);
@@ -29,6 +31,8 @@ function Rabbit(SpaceShip,TEXTURE,atX,atY) {
     Rabbit1.getXform().setRotationInDegree(0);
     Rabbit1.setColor([1,1,1,0]);
     Rabbit1.getXform().setPosition(pos[0] * this.SpaceShip.mapSize,pos[1] * this.SpaceShip.mapSize);
+    Rabbit1.setSpriteSequence(this.TexPos[1],376,64,128,1,0);
+    Rabbit1.setAnimationSpeed(8);
     GameObject.call(this,Rabbit1);
 }
 
@@ -42,7 +46,11 @@ Rabbit.eHeroState = Object.freeze({
     eDefend: 5,
     eFallDown: 6,
     eFaceLeft: 7,
-    eFaceRight: 8
+    eFaceRight: 8,
+    eWalkLeft: 9,
+    eWalkRight:10,
+    eClimbUp:11,
+    eClimbDown:12
 });
 
 Rabbit.eDirect = Object.freeze({
@@ -53,7 +61,47 @@ Rabbit.eDirect = Object.freeze({
 
 });
 
-Rabbit.prototype.set
+Rabbit.prototype.ChangeAnimation = function(state){
+    var radius = this.Cheat.getRigidBody().getRadius();
+    this.getXform().setSize(radius * 1.5 / 16, radius  * 3 / 16);
+    switch (state)
+    {
+        case Rabbit.eHeroState.eMove:
+                this.getRenderable().setSpriteSequence(this.TexPos[1],376,64,128,1,0); break;
+        case Rabbit.eHeroState.eWalkLeft:
+                this.getRenderable().setSpriteSequence(this.TexPos[1],188,64,128,2,30); break;
+        case Rabbit.eHeroState.eWalkRight:
+                this.getRenderable().setSpriteSequence(this.TexPos[1],0,64,128,2,30); break;
+        case Rabbit.eHeroState.eFallDown:
+            if (this.predirect == this.Control.Left)
+                this.getRenderable().setSpriteSequence(this.TexPos[1],282,64,128,1,0);
+            else if (this.predirect == this.Control.Right)
+                this.getRenderable().setSpriteSequence(this.TexPos[1],94,64,128,1,0); break;
+        case Rabbit.eHeroState.eClimbUp:
+                this.getRenderable().setSpriteSequence(this.TexPos[1],470,64,128,1,0); break;
+        case Rabbit.eHeroState.eClimbDown:
+                this.getXform().setSize(radius * 1.8 / 16, radius  * 3 / 16);
+                this.getRenderable().setSpriteSequence(this.TexPos[1],564,100,128,1,0); break;
+        case Rabbit.eHeroState.eAttack:
+        case Rabbit.eHeroState.eDefend:
+            if (this.RelaPos[1] > 9) {
+                this.getRenderable().setSpriteSequence(this.TexPos[1], 726, 64, 128, 1, 0);
+                break;
+            }
+            if (this.RelaPos[0]+1<0)
+                this.getRenderable().setSpriteSequence(this.TexPos[1],726,64,128,1,0);
+            else
+                this.getRenderable().setSpriteSequence(this.TexPos[1],804,64,128,1,0);break;
+        case Rabbit.eHeroState.eAdvance:
+            if (this.RelaPos[0]+1<0)
+                this.getRenderable().setSpriteSequence(this.TexPos[1],804,64,128,1,0);
+            else
+                this.getRenderable().setSpriteSequence(this.TexPos[1],726,64,128,1,0);break;
+
+    }
+};
+
+
 
 Rabbit.prototype.getType = function (x,y) {
     var i,j;
@@ -88,15 +136,17 @@ Rabbit.prototype.FSM = function(){
         case Rabbit.eHeroState.eMove:
             if (gEngine.Input.isKeyPressed(this.Control.Left)) {
                 this.curdirect = Rabbit.eDirect.eLeft;
+                if (this.predirect != this.Control.Left)
+                    this.ChangeAnimation(Rabbit.eHeroState.eWalkLeft);
                 this.predirect = this.Control.Left;
-                this.RelaPos[0] -= this.step;
-                this.collisionTest();
+                this.Move(2);
             }
             if (gEngine.Input.isKeyPressed(this.Control.Right)) {
                 this.curdirect = Rabbit.eDirect.eRight;
+                if (this.predirect != this.Control.Right)
+                    this.ChangeAnimation(Rabbit.eHeroState.eWalkRight);
                 this.predirect = this.Control.Right;
-                this.RelaPos[0] += this.step;
-                this.collisionTest();
+                this.Move(2);
             }
             if (gEngine.Input.isKeyPressed(this.Control.Up)) {
                 this.curdirect = Rabbit.eDirect.eUp;
@@ -115,13 +165,24 @@ Rabbit.prototype.FSM = function(){
                 }
             }
             if (gEngine.Input.isKeyClicked(this.Control.Leave)) {
-                if ((temp=this.getType(this.RelaPos[0],this.RelaPos[1]))>2)
+                if ((temp = this.getType(this.RelaPos[0] + Math.sign(this.RelaPos[0]) ,this.RelaPos[1]))>2)
+                {
                     this.mState = temp;
+                    this.ChangeAnimation(temp);
+                }
+                if ((temp = this.getType(this.RelaPos[0] - Math.sign(this.RelaPos[0]) ,this.RelaPos[1]))>2)
+                {
+                    this.mState = temp;
+                    this.ChangeAnimation(temp);
+                }
+                if ((temp=this.getType(this.RelaPos[0],this.RelaPos[1]))>2)
+                {
+                    this.mState = temp;
+                    this.ChangeAnimation(temp);
+                }
             }
-
             this.curdirect = Rabbit.eDirect.eDown;
-            this.RelaPos[1] -= this.step;
-            if (!this.collisionTest())
+            if (!this.Move(1))
             {
                 this.RelaPos[1] +=this.step;
                 if (this.getType(this.RelaPos[0],this.RelaPos[1]) != 2)
@@ -129,26 +190,30 @@ Rabbit.prototype.FSM = function(){
             }
             break;
         case Rabbit.eHeroState.eClimb:
+            this.ChangeAnimation(Rabbit.eHeroState.eClimbUp);
             if (gEngine.Input.isKeyPressed(this.Control.Up)) {
                 this.accel += 1;
                 if (this.getType(this.RelaPos[0],this.RelaPos[1] + this.step/2) == 2) {
                     this.RelaPos[1] += this.step;
+                    if (this.getType(this.RelaPos[0],this.RelaPos[1] + this.step/2) == 2) {
+                        this.RelaPos[1] += this.step;
+                    }
                 }
             }
             if (gEngine.Input.isKeyPressed(this.Control.Down )) {
+                this.ChangeAnimation(Rabbit.eHeroState.eClimbDown);
                 this.curdirect = Rabbit.eDirect.eDown;
-                this.RelaPos[1] -= this.step;
                 this.accel += 1;
-                this.collisionTest();
+                this.Move(3);
             }
             if (gEngine.Input.isKeyClicked(this.Control.Left)) {
-
                 this.curdirect = Rabbit.eDirect.eLeft;
                 this.RelaPos[0] -= this.step;
                 if (!this.collisionTest())
                 {
                     this.mState = Rabbit.eHeroState.eFallDown;
                     this.predirect = this.Control.Left;
+                    this.ChangeAnimation(Rabbit.eHeroState.eFallDown);
                 }
             }
             if (gEngine.Input.isKeyClicked(this.Control.Right))  {
@@ -158,6 +223,7 @@ Rabbit.prototype.FSM = function(){
                 {
                     this.mState = Rabbit.eHeroState.eFallDown;
                     this.predirect = this.Control.Right;
+                    this.ChangeAnimation(Rabbit.eHeroState.eFallDown);
                 }
             }
             console.log(this.accel);
@@ -188,8 +254,7 @@ Rabbit.prototype.FSM = function(){
         case Rabbit.eHeroState.eFallDown:
             var flag = false;
             this.curdirect = Rabbit.eDirect.eDown;
-            this.RelaPos[1] -= this.step;
-            flag = this.collisionTest();
+            flag = this.Move(2);
             if (this.predirect === this.Control.Left)
                 this.RelaPos[0] -= this.step;
             else
@@ -197,6 +262,10 @@ Rabbit.prototype.FSM = function(){
             this.curLateral ++;
             if (this.curLateral >= 5 && flag) {
                 this.mState = Rabbit.eHeroState.eMove;
+                if (this.predirect === this.Control.Left)
+                    this.ChangeAnimation(Rabbit.eHeroState.eWalkLeft);
+                else
+                    this.ChangeAnimation(Rabbit.eHeroState.eWalkRight);
                 this.curLateral = 0;
             }
             break;
@@ -213,6 +282,10 @@ Rabbit.prototype.FSM = function(){
                 this.mState = Rabbit.eHeroState.eMove;
             break;
     }
+    if (!(gEngine.Input.isKeyPressed(this.Control.Left)
+        ||gEngine.Input.isKeyPressed(this.Control.Right))&&this.mState == Rabbit.eHeroState.eMove)
+        this.ChangeAnimation(Rabbit.eHeroState.eMove);
+    this.getRenderable().updateAnimation();
 };
 
 
@@ -294,5 +367,34 @@ Rabbit.prototype.collisionTest = function(){
         return true;
     if (this.singleTest([this.RelaPos[0],this.RelaPos[1]-this.squareSize/2]))
         return true;
+    return false;
+};
+
+Rabbit.prototype.Move =function (num) {
+    var delta = [0,0];
+    if (this.curdirect == Rabbit.eDirect.eLeft)
+    {
+        delta[0] = -this.step;
+    }
+    else if (this.curdirect == Rabbit.eDirect.eRight)
+    {
+        delta[0] = +this.step;
+    }
+    else if (this.curdirect == Rabbit.eDirect.eUp)
+    {
+        delta[1] = +this.step;
+    }
+    else if (this.curdirect == Rabbit.eDirect.eDown)
+    {
+        delta[1] = -this.step;
+    }
+    while (num--)
+    {
+        vec2.add(this.RelaPos,this.RelaPos,delta);
+        if (this.collisionTest())
+        {
+            return true;
+        }
+    }
     return false;
 };

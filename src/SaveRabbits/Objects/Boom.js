@@ -16,6 +16,7 @@ function Boom(cx, cy,cw,ch, texture) {
     this.getXform().setPosition(cx, cy);
     //this.setColor([0,0,0,0]);
     var rigidShape = new RigidRectangle(this.getXform(), this.kWallWidth, this.kWallHeight);
+    
     rigidShape.toggleDrawBound();
     rigidShape.setMass(0);  // ensures no movements!
     this.setRigidBody(rigidShape);

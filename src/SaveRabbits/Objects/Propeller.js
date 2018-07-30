@@ -15,7 +15,7 @@ function Propeller(Cheat,direct,PropellerTexture,PropellerFireTexture)
     this.PropellerRender.getXform().setPosition(pos[0]+(radius*19/16)* Math.cos(this.mDirect*Math.PI/180)
                                                 ,pos[1]+(radius*19/16)* Math.sin(this.mDirect*Math.PI/180));
     this.PropellerRender.getXform().setRotationInDegree(90 + this.mDirect);
-
+    this.soundcounrt = 20;
 
     //喷了火
     this.PropellerFireRender = new TextureRenderable(PropellerFireTexture);
@@ -32,12 +32,15 @@ gEngine.Core.inheritPrototype(Propeller,GameObject);
 
 Propeller.prototype.update = function ()
 {
+        var audio = "assets/sounds/propeller_fire.mp3";
     this.fire = false;
     var pos = this.Cheat.getRigidBody().getCenter();
     var radius = this.Cheat.getRigidBody().getRadius();
     if (this.OnWork != null)
     {
         var theta = 2;
+        this.PropellerRender.setColor([1,0,0,0.3]);
+        this.PropellerFireRender.setColor([1,0,0,0.3]);
         if (gEngine.Input.isKeyPressed(this.OnWork.Control.Left))
         {
             this.mDirect+=theta;
@@ -48,6 +51,15 @@ Propeller.prototype.update = function ()
         }
         if (gEngine.Input.isKeyPressed(this.OnWork.Control.Fire))
         {
+            if(this.soundcounrt<0)
+            {
+               gEngine.AudioClips.playACue(audio); 
+               this.soundcounrt = 20;
+            }else
+            {
+                this.soundcounrt--;
+            }
+             
             if (this.Cheat.getVelocity()+1<=20)
                 this.Cheat.incVelocity(1);
             else
@@ -57,6 +69,8 @@ Propeller.prototype.update = function ()
         if (gEngine.Input.isKeyClicked(this.OnWork.Control.Leave))
         {
             this.OnWork = null;
+            this.PropellerRender.setColor([1,0,0,0]);
+            this.PropellerFireRender.setColor([1,0,0,0]);
         }
         this.Cheat.setCurrentFrontDir([Math.cos((this.mDirect+180)*Math.PI/180),Math.sin((this.mDirect+180)*Math.PI/180)]);
     }

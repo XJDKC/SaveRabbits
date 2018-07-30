@@ -8,7 +8,7 @@ function AboutUsLevel() {
     this.kBgStar1 = "assets/BgStar1.png";
     this.kBgStar2 = "assets/BgStar2.png";
     this.kBgStar3 = "assets/BgStar3.png";
-
+    this.aBgClip = "assets/sounds/bgClip.mp3";
     this.mBgTexture = null;
     this.mContentTexture = null;
     this.mBgStar1 = null;
@@ -65,6 +65,8 @@ AboutUsLevel.prototype.initialize = function () {
     this.mBgStar3 = new TextureRenderable(this.kBgStar3);
     this.mBgStar3.getXform().setSize(10,10);
     this.mBgStar3.getXform().setPosition(150,390);
+        //audio
+    gEngine.AudioClips.playBackgroundAudio(this.aBgClip);
 };
 AboutUsLevel.prototype.loadScene = function () {
     // Load scene
@@ -74,10 +76,11 @@ AboutUsLevel.prototype.loadScene = function () {
     gEngine.Textures.loadTexture(this.kBgStar1);
     gEngine.Textures.loadTexture(this.kBgStar2);
     gEngine.Textures.loadTexture(this.kBgStar3);
-
+    gEngine.AudioClips.loadAudio(this.aBgClip);
 };
 
 AboutUsLevel.prototype.unloadScene = function () {
+    gEngine.AudioClips.stopBackgroundAudio();
     // 卸载场景
     gEngine.LayerManager.cleanUp();
     gEngine.Textures.unloadTexture(this.kBgTexture);
@@ -85,6 +88,7 @@ AboutUsLevel.prototype.unloadScene = function () {
     gEngine.Textures.unloadTexture(this.kBgStar1);
     gEngine.Textures.unloadTexture(this.kBgStar2);
     gEngine.Textures.unloadTexture(this.kBgStar3);
+    gEngine.AudioClips.unloadAudio(this.aBgClip);
     if (this.Menu === true) {
         var nextLevel = new MenuLevel();
         gEngine.Core.startScene(nextLevel);
@@ -105,7 +109,7 @@ AboutUsLevel.prototype.update = function () {
     this.rotate(this.mBgStar1);
     this.rotate(this.mBgStar2);
     this.rotate(this.mBgStar3);
-    
+    gEngine.AudioClips.unloadAudio(this.aBgClip);    
 };
 
 AboutUsLevel.prototype.draw = function () {

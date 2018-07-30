@@ -19,7 +19,7 @@ function Minion(atX, atY, texture,  w, h) {
     this.kSpeed = 0.03;
     this.HP = 3;
     this.mProjectiles = new ParticleGameObjectSet();
-    this.mMinion = new TextureRenderable(texture);
+    this.mMinion = new SpriteAnimateRenderable(texture);
 
     this.changeSprite(atX, atY);
     GameObject.call(this, this.mMinion);
@@ -38,6 +38,7 @@ Minion.prototype.update = function () {
    // this.mMinion.updateAnimation();
     this.mProjectiles.update();
     GameObject.prototype.update.call(this);
+    this.getRenderable().updateAnimation();
 };
 
 Minion.prototype.draw = function (aCamera) {
@@ -49,7 +50,6 @@ Minion.prototype.changeSprite = function (atX, atY) {
     this.mMinion.setColor([1, 1, 1, 0]);
     this.mMinion.getXform().setPosition(atX, atY);
     this.mMinion.getXform().setSize(this.kWidth, this.kHeight);
-    
 };
 
 Minion.prototype.getProjectiles = function () {

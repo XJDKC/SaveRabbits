@@ -5,15 +5,15 @@
 function NewPlayerLevel() {
     this.kSpaceShipXML = "assets/SpaceShip.xml";
     this.kMapXML = "assets/Map.xml";
-    this.mapBackground = "assets/mapRigidTexture.png";
+    this.mapBackground = "assets/SKY2.png";
     this.mapRigidtexture = "assets/mapRigidTexture.png";
-    this.cheattexture = "assets/wingMan1.png";
+    this.cheattexture = "assets/enemy.png";
     this.kParticle = "assets/jetpack.png";
     this.kPropellerTexture = "assets/Propeller.png";
     this.kPropellerFireTexture = "assets/Propeller_fire.png";
     this.kDefenderTexture = "assets/defender.png";
-    this.rabTexture1 = "assets/bunny1_stand.png";
-    this.rabTexture2 = "assets/bunny2_stand.png";
+    this.rabTexture1 = "assets/RabbitAnimation.png";
+    this.rabTexture2 = "assets/RabbitAnimation.png";
     this.kCircleTexture = "assets/ball.png";
     this.kStairsTexture = "assets/stairs.png";
     this.kAdvanceControllerTexture = "assets/advance_controller.png";
@@ -26,9 +26,27 @@ function NewPlayerLevel() {
     this.kTips2Texture = "assets/Tip2.png";
     this.kTips3Texture = "assets/Tip3.png";
     this.kTip4Texture = "assets/Tip4.png";
+    this.kcoinTexture = "assets/gold_1.png";
+    this.kwindoorTexture = "assets/heart3.png";
+    this.khighlightTexture = "assets/highlight.png";
+    this.kCarrots = "assets/carrot.png";
+    this.kBloodBar = "assets/bloodbar3.png";
+    
+    //audio
+    
+    this.aBgClip = "assets/sounds/bgClip.mp3";
+    this.aChooseCue = "assets/sounds/choose.mp3";
+    this.aEnterCue = "assets/sounds/focus.mp3";
+    this.aCoinCue  = "assets/sounds/coin.mp3";
+    this.aShootBulletCue = "assets/sounds/shoot.mp3";
+    this.aBoom_enemyCue=  "assets/sounds/boom_enemy.mp3";
+    this.aPropellerCue = "assets/sounds/propeller_fire.mp3";
+    
     this.mAllParticles = new ParticleGameObjectSet();
     this.kTipsTexture =[this.kTips1Texture,this.kTips2Texture,this.kTips3Texture,this.kTip4Texture];
-    
+    this.mAllMinions = new GameObjectSet();
+    this.mAllObjs = new GameObjectSet ();
+    this.highlight = new GameObjectSet();
     this.showTip =1;
     this.mCamera = null;
     this.mMiniCamera = null;
@@ -40,11 +58,20 @@ function NewPlayerLevel() {
     this.mRabbit1 = null;
     this.mRabbit2 = null;
     this.mTips = null;
+    this.coin = null;
+    this.windoor = null;
+    this.bloodBar = null;
     this.mBgTexture = null;
     this.map = null;
+    this.minioncourt = 1;
+    this.coincourt = 1;
+    this.windoorcourt = 1;
+    this.highlightstate = 0;
+    this.coinset = new GameObjectSet();
     //场景切换
     this.Menu =false;
-    
+
+    this.cueCount = 1;
 
  
 }
@@ -78,8 +105,9 @@ NewPlayerLevel.prototype.initialize = function () {
                                             ,this.kRightAttackControllerTexture,this.kGunBarrelTexture,this.kGunBaseTexture);
           
     this.SpaceShip.SpaceShipMap = sceneParser.parseSpaceShipMap();
-    this.mRabbit1 = new Rabbit(this.SpaceShip, this.rabTexture1, -1, 0);
-    this.mRabbit2 = new Rabbit(this.SpaceShip, this.rabTexture2, 1, 0);
+
+    this.mRabbit1 = new Rabbit(this.SpaceShip,this.rabTexture1,-4.5,0,[0,512]);
+    this.mRabbit2 = new Rabbit(this.SpaceShip,this.rabTexture2,1,0,[0,362]);
     [this.mRabbit1.Control, this.mRabbit2.Control] = sceneParser.parseRabbits();
   
     var shipPos = this.Cheat.getXform().getPosition();
@@ -94,7 +122,30 @@ NewPlayerLevel.prototype.initialize = function () {
     this.mTips.getXform().setSize(40,20);
     this.mTips.getXform().setPosition(105, 430);
     this.mTips.setTextHeight(2);
-
+    
+    this.coin = new Coin(10,10,10,this.kcoinTexture);
+    this.coinset.addToSet(this.coin);
+    this.windoor = new WinDoor(10,10,15,15,this.kwindoorTexture);
+    
+    var highlight1 = new Wall(10,10,7,7,0,this.khighlightTexture);
+    var highlight2 = new Wall(10,10,7,7,0,this.khighlightTexture);
+    var highlight3 = new Wall(10,10,7,7,0,this.khighlightTexture);
+    var highlight4 = new Wall(10,10,7,7,0,this.khighlightTexture);
+    var highlight5 = new Wall(10,10,7,7,0,this.khighlightTexture);
+    var highlight6 = new Wall(10,10,7,7,0,this.khighlightTexture);
+    this.highlight.addToSet(highlight1);
+    this.highlight.addToSet(highlight2);
+    this.highlight.addToSet(highlight3);
+    this.highlight.addToSet(highlight4);
+    this.highlight.addToSet(highlight5);
+    this.highlight.addToSet(highlight6);
+    
+    this.bloodBar = new BloodBar(40,250,4,40,this.kBloodBar,this.kCarrots);
+        
+    //var showminion = new FireMinion(this.Cheat);
+    //audio
+    gEngine.AudioClips.playBackgroundAudio(this.aBgClip);
+    
 };
 NewPlayerLevel.prototype.loadScene = function () {
     // Load scene
@@ -120,12 +171,27 @@ NewPlayerLevel.prototype.loadScene = function () {
     gEngine.Textures.loadTexture(this.kTipsTexture[1]);
     gEngine.Textures.loadTexture(this.kTipsTexture[2]);
     gEngine.Textures.loadTexture(this.kTipsTexture[3]);
-  
+    gEngine.Textures.loadTexture(this.kcoinTexture);
+    gEngine.Textures.loadTexture(this.kwindoorTexture);
+    gEngine.Textures.loadTexture(this.khighlightTexture);
+    gEngine.Textures.loadTexture(this.kCarrots);
+    gEngine.Textures.loadTexture(this.kBloodBar);
     //gEngine.Textures.loadTexture(this.mapRigidtexture);
+ ///audio
+    gEngine.AudioClips.loadAudio(this.aBgClip);
+    gEngine.AudioClips.loadAudio(this.aChooseCue);
+    gEngine.AudioClips.loadAudio(this.aEnterCue);
+    gEngine.AudioClips.loadAudio(this.aCoinCue);
+    gEngine.AudioClips.loadAudio(this.aShootBulletCue);
+    gEngine.AudioClips.loadAudio(this.aBoom_enemyCue);
+    gEngine.AudioClips.loadAudio(this.aPropellerCue);
 
 };
 
 NewPlayerLevel.prototype.unloadScene = function () {
+    
+     //stop bg music
+    gEngine.AudioClips.stopBackgroundAudio();
     // 卸载场景
     gEngine.LayerManager.cleanUp();
     gEngine.TextFileLoader.unloadTextFile(this.kSpaceShipXML);
@@ -150,6 +216,21 @@ NewPlayerLevel.prototype.unloadScene = function () {
     gEngine.Textures.unloadTexture(this.kTipsTexture[1]);
     gEngine.Textures.unloadTexture(this.kTipsTexture[2]);
     gEngine.Textures.unloadTexture(this.kTipsTexture[3]);
+    gEngine.Textures.unloadTexture(this.kcoinTexture);
+    gEngine.Textures.unloadTexture(this.kwindoorTexture);
+    gEngine.Textures.unloadTexture(this.khighlightTexture);
+    gEngine.Textures.unloadTexture(this.kCarrots);
+    gEngine.Textures.unloadTexture(this.kBloodBar);
+    
+     //audio
+    gEngine.AudioClips.unloadAudio(this.aBgClip);
+    gEngine.AudioClips.unloadAudio(this.aChooseCue);
+    gEngine.AudioClips.unloadAudio(this.aEnterCue);
+    gEngine.AudioClips.unloadAudio(this.aCoinCue);
+    gEngine.AudioClips.unloadAudio(this.aShootBulletCue);
+    gEngine.AudioClips.unloadAudio(this.aBoom_enemyCue);
+    gEngine.AudioClips.unloadAudio(this.aPropellerCue);
+
     if(this.Menu === true){
         var nextLevel = new MenuLevel();
         gEngine.Core.startScene(nextLevel);
@@ -167,17 +248,152 @@ NewPlayerLevel.prototype.update = function () {
 //     this.mTips1Texture.update(shipPos);
     this.mRabbit1.update();
     this.mRabbit2.update();
+    this.bloodBar.update(this.Cheat);
+    
     //next tip
     if(gEngine.Input.isKeyClicked(gEngine.Input.keys.Enter)){
+        gEngine.AudioClips.playACue(this.aEnterCue);
         if(this.showTip<8)
         this.showTip++;
     }
     if(gEngine.Input.isKeyClicked((gEngine.Input.keys.Q))){
+        
         this.Menu = true;
         gEngine.GameLoop.stop();
     }
+    if((this.showTip === 3)&&gEngine.Input.isKeyClicked((gEngine.Input.keys.G))){
+        this.showTip++;
+    }
+    if((this.showTip === 3)&&gEngine.Input.isKeyClicked((gEngine.Input.keys.Dian))){
+        this.showTip++;
+    }
+    
+    
+    if (this.windoor.update(this.Cheat))
+    {       this.Menu = true;
+         gEngine.GameLoop.stop();
+    }
+
+  
+    
+            var i,j,k,m;
+    var collided = false;
+    var collisionInfo = new CollisionInfo();
+    
+    //spaceship touch the coin
+    for( i =0 ;i<this.coinset.size();i++){
+                var platBox = this.coinset.getObjectAt(i).getRigidBody();
+                collided = this.Cheat.getRigidBody().collisionTest(platBox, collisionInfo);
+                if (collided) {
+                    //if(this.cueCount){
+                            gEngine.AudioClips.playACue(this.aCoinCue);
+//                            this.cueCount = 0;
+                       // }
+                            this.mAllObjs.removeFromSet(this.coin);
+                            this.coinset.removeFromSet(this.coin);
+                            
+//                            this.showTip++;
+                }
+            } 
+                
+            //minion bullet shoot the defender 
+        for(i=0 ; i<this.mAllMinions.size();i++){
+        var platBox = this.mAllMinions.getObjectAt(i).getProjectiles();
+        for (j = 0; j < platBox.size(); j++) {
+            var pBox = platBox.getObjectAt(j).getRigidBody();
+                
+                collided = this.SpaceShip.mDefender.getRigidBody().collisionTest(pBox, collisionInfo);
+                if (collided) {
+                    
+                    //gEngine.AudioClips.playACue(this.aShootBulletCue);
+                    platBox.removeFromSet(platBox.getObjectAt(j));
+//                    this.showTip++;
+                }
+                
+        
+        }   
+    }
+    
+        //minion bullets shoot the spaceship
+    if(this.bloodBar.getBloodLen()<=0){
+         gEngine.AudioClips.playACue(this.aBoom_enemyCue);
+         this.Menu = true;
+         gEngine.GameLoop.stop();
+        
+    }
+        for(i=0 ; i<this.mAllMinions.size();i++){
+        var platBox = this.mAllMinions.getObjectAt(i).getProjectiles();
+        for (j = 0; j < platBox.size(); j++) {
+            var pBox = platBox.getObjectAt(j).getRigidBody();
+                collided = this.Cheat.getRigidBody().collisionTest(pBox, collisionInfo);
+                if (collided) {
+                   
+                  
+                    platBox.removeFromSet(platBox.getObjectAt(j));
+                    this.bloodBar.setBarlen(2);
+                }
+            }   
+        }         
+        
+                //spaceship bullet shoot the minions
+        for (i = 0; i < 4; i++) {
+        var platBox = this.SpaceShip.getShipWeapon()[i].getProjectiles();
+        for(j=0 ; j<platBox.size();j++){
+        var pp = platBox.getObjectAt(j).getRigidBody();
+        for (m = 0; m < this.mAllMinions.size(); m++) {
+                collided = this.mAllMinions.getObjectAt(m).getRigidBody().collisionTest(pp, collisionInfo);
+                if (collided) {     
+                            //gEngine.AudioClips.playACue(this.aShootBulletCue);
+                            this.mAllMinions.getObjectAt(m).HP -= platBox.getObjectAt(j).damage;
+                            if (this.mAllMinions.getObjectAt(m).HP <= 0)
+                            {
+                                gEngine.AudioClips.playACue(this.aBoom_enemyCue);
+
+                                //
+                                this.mAllMinions.removeFromSet(this.mAllMinions.getObjectAt(m));
+                                
+                                this.showTip++;
+                            }
+                            platBox.removeFromSet(platBox.getObjectAt(j));
+                        }
+                    }   
+                }
+            }
+    
+            
+            
+    
     this.shipPos = this.Cheat.getXform().getPosition();
+    
+    this.highlight.getObjectAt(0).getXform().setPosition(this.shipPos[0]+9,this.shipPos[1]+8);
+    this.highlight.getObjectAt(1).getXform().setPosition(this.shipPos[0]-1,this.shipPos[1]+1);
+    this.highlight.getObjectAt(2).getXform().setPosition(this.shipPos[0]-13,this.shipPos[1]+1); 
+    this.highlight.getObjectAt(3).getXform().setPosition(this.shipPos[0]+13,this.shipPos[1]+1); 
+    this.highlight.getObjectAt(4).getXform().setPosition(this.shipPos[0]-2,this.shipPos[1]+13); 
+    this.highlight.getObjectAt(5).getXform().setPosition(this.shipPos[0]+1,this.shipPos[1]-12); 
+        if(this.showTip === 7 &&this.coincourt)
+    {
+        //gEngine.AudioClips.playACue(this.aCoinCue);
+        
+        this.mAllObjs.addToSet(this.coin);
+        this.coin.getXform().setPosition(shipPos[0]+30,shipPos[1]-30);
+        this.coincourt--;
+    }
+    
+    if(this.showTip === 8 &&this.windoorcourt)
+    {
+        this.mAllObjs.addToSet(this.windoor);
+        this.windoor.winDoor.getXform().setPosition(shipPos[0]+30,shipPos[1]-30);
+        this.windoorcourt--;
+    }
+        if(this.showTip === 4 &&this.minioncourt)
+    {
+        this.produceMinions(1);
+        this.minioncourt--;
+    }
+    
     this.mCamera.setWCCenter(this.shipPos[0], this.shipPos[1]);
+    this.mAllMinions.update();
     this.showTipsTexture(this.showTip,'update');
     this.mMiniCamera.setWCCenter(this.shipPos[0], this.shipPos[1]);
 };
@@ -185,21 +401,43 @@ NewPlayerLevel.prototype.update = function () {
 NewPlayerLevel.prototype.draw = function () {
     //Scene.prototype.draw.call(this);
     gEngine.Core.clearCanvas([0, 0, 0, 1]);
-   
+
     this.mCamera.setupViewProjection();
+    this.map.draw(this.mCamera);
+    this.mAllObjs.draw(this.mCamera);
+    this.mAllMinions.draw(this.mCamera);
     this.mAllParticles.draw(this.mCamera);
+    this.bloodBar.draw(this.mCamera);
     this.SpaceShip.draw(this.mCamera, this.Cheat);
     this.mRabbit1.draw(this.mCamera);
     this.mRabbit2.draw(this.mCamera);
+
     this.showTipsTexture(this.showTip,'draw');
     this.showTips(this.showTip);
+    switch(this.highlightstate){
+            case 0:
+                break;
+            case 1:
+                 this.highlight.getObjectAt(0).draw(this.mCamera);
+                break;
+            case 2:
+                this.highlight.getObjectAt(2).draw(this.mCamera);
+                this.highlight.getObjectAt(3).draw(this.mCamera);
+                this.highlight.getObjectAt(4).draw(this.mCamera);
+                this.highlight.getObjectAt(5).draw(this.mCamera);
+                break;
+            case 3:
+                 this.highlight.getObjectAt(1).draw(this.mCamera);
+                break;
+        }
+    
     // gEngine.LayerManager.drawAllLayers(this.mCamera);
-    this.mMiniCamera.setupViewProjection();
-    this.mAllParticles.draw(this.mMiniCamera);
-    this.SpaceShip.draw(this.mMiniCamera, this.Cheat);
-    this.mRabbit1.draw(this.mMiniCamera);
-    this.mRabbit2.draw(this.mMiniCamera);
-    gEngine.LayerManager.drawAllLayers(this.mMiniCamera);
+//    this.mMiniCamera.setupViewProjection();
+//    this.mAllParticles.draw(this.mMiniCamera);
+//    this.SpaceShip.draw(this.mMiniCamera, this.Cheat);
+//    this.mRabbit1.draw(this.mMiniCamera);
+//    this.mRabbit2.draw(this.mMiniCamera);
+//    gEngine.LayerManager.drawAllLayers(this.mMiniCamera);
 };
 
 NewPlayerLevel.prototype.setText = function (text,posX,posY){
@@ -219,10 +457,14 @@ NewPlayerLevel.prototype.showTipsTexture = function(showTips,op){
                  this.mTips2Texture.draw(this.mCamera);
                  break;
             case 5:
+                 this.mTips1Texture.draw(this.mCamera);
+                 break;
             case 6:
                  this.mTips3Texture.draw(this.mCamera);
                  break;
             case 7:
+                 this.mTips2Texture.draw(this.mCamera);
+                 break;
             case 8:
                  this.mTips4Texture.draw(this.mCamera);
                  break;
@@ -239,10 +481,14 @@ NewPlayerLevel.prototype.showTipsTexture = function(showTips,op){
                  this.mTips2Texture.getXform().setPosition(this.shipPos[0]+45, this.shipPos[1]+25);
                  break;
             case 5:
+                 this.mTips1Texture.getXform().setPosition(this.shipPos[0]+45, this.shipPos[1]+25);
+                 break;
             case 6:
                  this.mTips3Texture.getXform().setPosition(this.shipPos[0]-40, this.shipPos[1]+25);
                  break;
             case 7:
+                 this.mTips2Texture.getXform().setPosition(this.shipPos[0]+45, this.shipPos[1]+25);
+                 break;
             case 8:
                  this.mTips4Texture.getXform().setPosition(this.shipPos[0]-45, this.shipPos[1]+25);
                  break;
@@ -257,60 +503,86 @@ NewPlayerLevel.prototype.showTips = function (showTips){
             this.setText("Rabbits', I'm Dr.Rabbit. let me",this.shipPos[0]+25,this.shipPos[1]+30);
             this.setText("show you how to play the game!",this.shipPos[0]+25,this.shipPos[1]+27);
             this.setText("Press [ENTER] to continue...",this.shipPos[0]+25,this.shipPos[1]+24);
+            this.highlightstate = 0;
             break;
         case 2:
-            this.setText("At first, try to move your rabbit",this.shipPos[0]+25,this.shipPos[1]+33);
-            this.setText("with [WASD] for player 1 and [Up,",this.shipPos[0]+25,this.shipPos[1]+30);
-            this.setText("Left,Down,Right] for player 2.",this.shipPos[0]+25,this.shipPos[1]+27);
-            this.setText("If you are ready,press",this.shipPos[0]+25,this.shipPos[1]+24);
-            this.setText("[ENTER] to continue...",this.shipPos[0]+25,this.shipPos[1]+21);
+            this.setText("Move in the spaceship:",this.shipPos[0]+25,this.shipPos[1]+33);
+            this.setText("[W,A,S,D] for player 1",this.shipPos[0]+25,this.shipPos[1]+30);
+            this.setText("[Up,Left,Down,Right] for player 2",this.shipPos[0]+25,this.shipPos[1]+27);
+            this.setText("",this.shipPos[0]+25,this.shipPos[1]+24);
+            this.setText("press [ENTER] to continue...",this.shipPos[0]+25,this.shipPos[1]+21);
+            this.highlightstate = 0;
             break;
         case 3:
-            this.setText("There are three major controllers in",this.shipPos[0]+25,this.shipPos[1]+33);
-            this.setText("our space ship, let's begin with ",this.shipPos[0]+25,this.shipPos[1]+30);
-            this.setText("the weapon, it can help you to",this.shipPos[0]+25,this.shipPos[1]+27);
-            this.setText("eliminate your enemies. ",this.shipPos[0]+25,this.shipPos[1]+24);
-            this.setText("Press [ENTER] to ",this.shipPos[0]+25,this.shipPos[1]+21);
-             this.setText("continue..",this.shipPos[0]+25,this.shipPos[1]+18);
+            this.setText("Move to the position of the highlight area:",this.shipPos[0]+25,this.shipPos[1]+33);
+            this.setText("[G] to gain or lose control for player 1",this.shipPos[0]+25,this.shipPos[1]+30);
+            this.setText("[.] to gain or lose control for player 2",this.shipPos[0]+25,this.shipPos[1]+27);
+            this.setText("",this.shipPos[0]+25,this.shipPos[1]+24);
+            this.setText("Press [ENTER] to continue..",this.shipPos[0]+25,this.shipPos[1]+21);
+            this.setText("",this.shipPos[0]+25,this.shipPos[1]+18);
+            this.highlightstate = 1;
             break;
         case 4:
             
-            this.setText("Frist, you have to move to the ",this.shipPos[0]+25,this.shipPos[1]+33);
-            this.setText("position of the controller, press",this.shipPos[0]+25,this.shipPos[1]+30);
-            this.setText("[G](for P1,) or [.](for P2)",this.shipPos[0]+25,this.shipPos[1]+27);
-            this.setText("to gain contorl.  ",this.shipPos[0]+25,this.shipPos[1]+24);
+            this.setText("Use defender towards the minion:",this.shipPos[0]+25,this.shipPos[1]+33);
+            this.setText("[A,D] to rotate for player 1",this.shipPos[0]+25,this.shipPos[1]+30);
+            this.setText("[Left,Right] to rotate for player 2",this.shipPos[0]+25,this.shipPos[1]+27);
+            this.setText("",this.shipPos[0]+25,this.shipPos[1]+24);
             this.setText("Press [ENTER] to ",this.shipPos[0]+25,this.shipPos[1]+21);
             this.setText("continue..",this.shipPos[0]+25,this.shipPos[1]+18);
-            
+            this.highlightstate = 0;
             break;
         case 5:
-            this.setText("Try [A,D](for P1)[Left,Right]",this.shipPos[0]-60,this.shipPos[1]+33);
-            this.setText("(for P2)to rotate the weapon.",this.shipPos[0]-60,this.shipPos[1]+30);
-            this.setText("      Press [F](for P1) or [,](for",this.shipPos[0]-60,this.shipPos[1]+27);
-            this.setText("          P2)to fire, click [G] or  " ,this.shipPos[0]-60,this.shipPos[1]+24);
-            this.setText("         [.] to leave. Press ",this.shipPos[0]-60,this.shipPos[1]+21);
-            this.setText("          [ENTER] to continue..",this.shipPos[0]-60,this.shipPos[1]+18);
+            this.setText("Use weapons to kill the minion:",this.shipPos[0]+25,this.shipPos[1]+33);
+            this.setText("gain the control and rotate it",this.shipPos[0]+25,this.shipPos[1]+30);
+            this.setText("[F] to shoot bullets for player 1",this.shipPos[0]+25,this.shipPos[1]+27);
+            this.setText("[,] to shoot bullets for player 2" ,this.shipPos[0]+25,this.shipPos[1]+24);
+            this.setText("",this.shipPos[0]+25,this.shipPos[1]+21);
+            this.setText("press [ENTER] to continue..",this.shipPos[0]+25,this.shipPos[1]+18);
+            this.highlightstate = 2;
             break;
         case 6:
-            this.setText("Try to do the same operation ",this.shipPos[0]-60,this.shipPos[1]+33);
-            this.setText("to other controllers, and get",this.shipPos[0]-60,this.shipPos[1]+30);
-            this.setText("     used to this kind of module ",this.shipPos[0]-60,this.shipPos[1]+27);
-            this.setText("        as soon as possible. " ,this.shipPos[0]-60,this.shipPos[1]+24);
-            this.setText("        Press [ENTER] to continue..",this.shipPos[0]-60,this.shipPos[1]+21);
+            this.setText("Use Propeller to move the spaceship:",this.shipPos[0]-60,this.shipPos[1]+33);
+            this.setText("gain control and rotate it",this.shipPos[0]-60,this.shipPos[1]+30);
+            this.setText("[F] to start Propeller for player 1",this.shipPos[0]-60,this.shipPos[1]+27);
+            this.setText("[,] to start Propeller for player 2" ,this.shipPos[0]-60,this.shipPos[1]+24);
+            this.setText("",this.shipPos[0]-60,this.shipPos[1]+21);
+            this.setText("press [ENTER] to continue..",this.shipPos[0]-60,this.shipPos[1]+18);
+            this.highlightstate = 3;
             break;
         case 7:
-            this.setText("Great! You have done a really",this.shipPos[0]-65,this.shipPos[1]+35);
-            this.setText("goodjob. Besides, remember your",this.shipPos[0]-65,this.shipPos[1]+32);
-            this.setText("final goal is collecting the coins",this.shipPos[0]-65,this.shipPos[1]+29);
-            this.setText("and protect yourslef from death." ,this.shipPos[0]-65,this.shipPos[1]+26);
-            this.setText("Press     [ENTER] to continue..",this.shipPos[0]-65,this.shipPos[1]+23);
+            this.setText("Travel in the space:",this.shipPos[0]+25,this.shipPos[1]+35);
+            this.setText("You should collect coins",this.shipPos[0]+25,this.shipPos[1]+32);
+            this.setText("before passing the level",this.shipPos[0]+25,this.shipPos[1]+29);
+            this.setText("",this.shipPos[0]+25,this.shipPos[1]+26);
+            this.setText("press [ENTER] to continue..",this.shipPos[0]+25,this.shipPos[1]+23);
+            this.highlightstate = 0;
             break;
         case 8:
-            this.setText("Excellent! Now you have known all",this.shipPos[0]-65,this.shipPos[1]+35);
-            this.setText("the rules. If you are ready, just",this.shipPos[0]-65,this.shipPos[1]+32);
-            this.setText("press [q] to back to the main",this.shipPos[0]-65,this.shipPos[1]+29);
-            this.setText(" interface and enjoy our game!!!" ,this.shipPos[0]-65,this.shipPos[1]+26);
-            this.setText("I'm       sure you will love it!!!",this.shipPos[0]-65,this.shipPos[1]+23);
+            this.setText("Move and go to the door:",this.shipPos[0]-65,this.shipPos[1]+35);
+            this.setText("If you have collected all the coins",this.shipPos[0]-65,this.shipPos[1]+32);
+            this.setText("You can pass the level",this.shipPos[0]-65,this.shipPos[1]+29);
+            this.setText("" ,this.shipPos[0]-65,this.shipPos[1]+26);
+            this.setText("Let's go!",this.shipPos[0]-65,this.shipPos[1]+23);
+            this.highlightstate = 0;
             break;
     }
 }
+
+
+NewPlayerLevel.prototype.produceMinions = function(num){
+
+    //加一个音频
+    var Pos = this.Cheat.getXform().getPosition();
+    var radius = this.Cheat.getRigidBody().getRadius();
+    var x,y,texture,w,h,Cheat,m;
+    var rot = Math.random() * Math.PI * 2;
+    for (var i=0;i<num;i++)
+    {
+            x = Pos[0] + 2 * radius * Math.cos(rot);
+            y = Pos[1] + 2 * radius *Math.sin(rot);
+            m = new FireMinion(x, y,  this.cheattexture, 7, 7 , this.Cheat);
+            this.mAllMinions.addToSet(m);
+            rot += 2 * Math.PI/num;
+    }
+};

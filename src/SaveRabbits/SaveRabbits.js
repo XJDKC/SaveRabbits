@@ -8,13 +8,14 @@ function SaveRabbits(){
     this.kMapXML = "assets/Map.xml";
     this.mapBackground ="assets/mapRigidTexture.png";
     this.mapRigidtexture = "assets/empty.png";
-    this.cheattexture = "assets/wingMan1.png";
+    this.cheattexture = "assets/enemy.png";
     this.kParticle = "assets/jetpack.png";
+    this.kBullet = "assets/bullet2.png";
     this.kPropellerTexture = "assets/Propeller.png";
     this.kPropellerFireTexture = "assets/Propeller_fire.png";
     this.kDefenderTexture = "assets/defender.png";
-    this.rabTexture1 = "assets/bunny1_stand.png";
-    this.rabTexture2 = "assets/bunny2_stand.png";
+    this.rabTexture1 = "assets/RabbitAnimation.png";
+    this.rabTexture2 = "assets/RabbitAnimation.png";
     this.kCircleTexture = "assets/ball.png";
     this.kCarrots = "assets/carrot.png";
     this.kStairsTexture = "assets/stairs.png";
@@ -34,7 +35,7 @@ function SaveRabbits(){
     this.bomb = "assets/bomb.png";
     this.kWinDoor = "assets/heart3.png";
     this.kBloodBar = "assets/bloodbar3.png";
-    this.laserminion = "assets/spikeManjump.png";
+    this.laserminion = "assets/laserminion.png";
     this.mapwall = "assets/mapwall.png";
     this.AllWalls = new GameObjectSet();
     this.mAllMinions = new GameObjectSet();
@@ -45,7 +46,16 @@ function SaveRabbits(){
     this.mAllBloodpacks = new GameObjectSet();
     this.mAllBooms = new GameObjectSet();    
     this.bloodcourt = 5;
-    
+    this.aBgClip = "assets/sounds/bgClip.mp3";
+    this.aChooseCue = "assets/sounds/choose.mp3";
+    this.aEnterCue = "assets/sounds/focus.mp3";
+    this.aCoinCue  = "assets/sounds/coin.mp3";
+    this.aShootBulletCue = "assets/sounds/shoot.mp3";
+    this.aBoom_enemyCue=  "assets/sounds/boom.mp3";
+    this.aPropellerCue = "assets/sounds/propeller_fire.mp3";
+    this.aWarningCue = "assets/sounds/warning.mp3";
+    this.aBoomCue = "assets/sounds/boom_enemy.mp3";
+    this.aLaserCue =  "assets/sounds/laser_shoot.mp3";
     this.mCamera = null;
     this.mMiniCamera = null;
     this.mHPCamera = null;
@@ -154,10 +164,10 @@ SaveRabbits.prototype.initialize = function(){
                                                                  
     this.SpaceShip.SpaceShipMap = sceneParser.parseSpaceShipMap();
 
-    this.mRabbit1 = new Rabbit(this.SpaceShip,this.rabTexture1,-4.5,0);
-    this.mRabbit2 = new Rabbit(this.SpaceShip,this.rabTexture2,1,0);
+    this.mRabbit1 = new Rabbit(this.SpaceShip,this.rabTexture1,-4.5,0,[0,512]);
+    this.mRabbit2 = new Rabbit(this.SpaceShip,this.rabTexture2,1,0,[0,362]);
 
-
+    gEngine.AudioClips.playBackgroundAudio(this.aBgClip);
     [this.mRabbit1.Control,this.mRabbit2.Control] = sceneParser.parseRabbits();
 };
 
@@ -170,8 +180,8 @@ SaveRabbits.prototype.loadScene = function () {
     gEngine.Textures.loadTexture(this.rabTexture1);
     gEngine.Textures.loadTexture(this.rabTexture2);
 
+    gEngine.Textures.loadTexture(this.kBullet);
     gEngine.Textures.loadTexture(this.kCircleTexture);
-
     gEngine.Textures.loadTexture(this.mapBackground);
     gEngine.Textures.loadTexture(this.cheattexture);
     gEngine.Textures.loadTexture(this.kParticle);
@@ -202,9 +212,24 @@ SaveRabbits.prototype.loadScene = function () {
     gEngine.Textures.loadTexture(this.goldcoin);
     gEngine.Textures.loadTexture(this.laserminion);
     gEngine.Textures.loadTexture(this.mapwall);
+    
+     ///audio
+    gEngine.AudioClips.loadAudio(this.aBgClip);
+    gEngine.AudioClips.loadAudio(this.aChooseCue);
+    gEngine.AudioClips.loadAudio(this.aEnterCue);
+    gEngine.AudioClips.loadAudio(this.aCoinCue);
+    gEngine.AudioClips.loadAudio(this.aShootBulletCue);
+    gEngine.AudioClips.loadAudio(this.aBoom_enemyCue);
+    gEngine.AudioClips.loadAudio(this.aPropellerCue);
+    gEngine.AudioClips.loadAudio(this.aWarningCue);
+    gEngine.AudioClips.loadAudio(this.aBoomCue);
+    gEngine.AudioClips.loadAudio(this.aLaserCue);
+    
 };
 
 SaveRabbits.prototype.unloadScene = function () {
+     //stop bg music
+    gEngine.AudioClips.stopBackgroundAudio();
     // 卸载场景
         gEngine.LayerManager.cleanUp();
     
@@ -226,7 +251,8 @@ SaveRabbits.prototype.unloadScene = function () {
     gEngine.Textures.unloadTexture(this.kRightAttackControllerTexture);
     gEngine.Textures.unloadTexture(this.kGunBarrelTexture);
     gEngine.Textures.unloadTexture(this.kGunBaseTexture);
-    gEngine.Textures.unloadTexture(this.sky);    
+    gEngine.Textures.unloadTexture(this.sky);
+    gEngine.Textures.unloadTexture(this.kBullet);
     gEngine.Textures.unloadTexture(this.kDoorTop);
     gEngine.Textures.unloadTexture(this.kDoorBot);
     gEngine.Textures.unloadTexture(this.kDoorSleeve);
@@ -238,8 +264,20 @@ SaveRabbits.prototype.unloadScene = function () {
     gEngine.Textures.unloadTexture(this.bomb);      
     gEngine.Textures.unloadTexture(this.mapwall);      
     //kWinDoor
-        gEngine.Textures.unloadTexture(this.mapRigidtexture);
+    gEngine.Textures.unloadTexture(this.mapRigidtexture);
     gEngine.Textures.unloadTexture(this.kWinDoor);
+    
+      //audio
+    gEngine.AudioClips.unloadAudio(this.aBgClip);
+    gEngine.AudioClips.unloadAudio(this.aChooseCue);
+    gEngine.AudioClips.unloadAudio(this.aEnterCue);
+    gEngine.AudioClips.unloadAudio(this.aCoinCue);
+    gEngine.AudioClips.unloadAudio(this.aShootBulletCue);
+    gEngine.AudioClips.unloadAudio(this.aBoom_enemyCue);
+    gEngine.AudioClips.unloadAudio(this.aPropellerCue);
+    gEngine.AudioClips.unloadAudio(this.aWarningCue);
+    gEngine.AudioClips.unloadAudio(this.aBoomCue);
+    gEngine.AudioClips.unloadAudio(this.aLaserCue);
     
      if(this.win === true){
         var nextLevel = new winLevel();  // next level to be loaded
@@ -288,47 +326,42 @@ SaveRabbits.prototype.update = function(){
 //        gEngine.GameLoop.stop();
 //    }
 
-    
 
-            
-            
+    //collision detection
 
-           //collision detection
-           
-           
-           
-        var i,j,k,m;
+
+    var i, j, k, m;
     var collided = false;
     var collisionInfo = new CollisionInfo();
-    
-    
-            //door logic
-            if(this.court<=0){
-                for (i = 0; i < this.mAllButtons.size(); i++){
-                this.mAllButtons.getObjectAt(i).resetButton();
-                 }
-              this.court = 20;
-                }
-                else{
-                this.court--;
-                }
-            
-            //spaceship bullet shoot the button
-            for (i = 0; i < 4; i++) {
+
+
+    //door logic
+    if (this.court <= 0) {
+        for (i = 0; i < this.mAllButtons.size(); i++) {
+            this.mAllButtons.getObjectAt(i).resetButton();
+        }
+        this.court = 20;
+    }
+    else {
+        this.court--;
+    }
+
+    //spaceship bullet shoot the button
+    for (i = 0; i < 4; i++) {
         var platBox = this.SpaceShip.getShipWeapon()[i].getProjectiles();
-        for(j=0 ; j<platBox.size();j++){
-        var pp = platBox.getObjectAt(j).getRigidBody();
-        for (m = 0; m < this.mAllButtons.size(); m++) {
+        for (j = 0; j < platBox.size(); j++) {
+            var pp = platBox.getObjectAt(j).getRigidBody();
+            for (m = 0; m < this.mAllButtons.size(); m++) {
                 collided = this.mAllButtons.getObjectAt(m).getRigidBody().collisionTest(pp, collisionInfo);
                 if (collided) {
-                           this.mAllButtons.getObjectAt(m).pressButton(); 
-                           platBox.removeFromSet(platBox.getObjectAt(j));                         
-                              }
-                         }   
-                     }
+                    this.mAllButtons.getObjectAt(m).pressButton();
+                    platBox.removeFromSet(platBox.getObjectAt(j));
                 }
-            //open the door
-                           var allUnlocked = false;     
+            }
+        }
+    }
+    //open the door
+    var allUnlocked = false;
     for (i = 0; i < this.mAllButtons.size(); i++) {
         if (this.mAllButtons.getObjectAt(i).getButtonState() === true) {
             allUnlocked = true;
@@ -338,199 +371,208 @@ SaveRabbits.prototype.update = function(){
         }
     }
     if (allUnlocked) {
+          //加门音频
         this.mAllDoors.getObjectAt(0).unlockDoor();
     }
     //reset all
 
 
-    
-            
-            
-        //minion bullet touch spaceship ship weapon bullet
+    //minion bullet touch spaceship ship weapon bullet
     for (i = 0; i < 4; i++) {
         var platBox = this.SpaceShip.getShipWeapon()[i].getProjectiles();
         for (j = 0; j < platBox.size(); j++) {
             var pBox = platBox.getObjectAt(j).getRigidBody();
-                    for (k = 0; k < this.mAllMinions.size(); k++) {
-                    var p = this.mAllMinions.getObjectAt(k).getProjectiles(); 
-                    for (m = 0; m < p.size(); m++) {
-                  var pp = p.getObjectAt(m).getRigidBody();
-                 collided = pBox.collisionTest(pp, collisionInfo);
-                             if (collided) {
-                         platBox.removeFromSet(platBox.getObjectAt(j));
-                         p.removeFromSet(p.getObjectAt(m)); 
-                      }
+            for (k = 0; k < this.mAllMinions.size(); k++) {
+                var p = this.mAllMinions.getObjectAt(k).getProjectiles();
+                for (m = 0; m < p.size(); m++) {
+                    var pp = p.getObjectAt(m).getRigidBody();
+                    collided = pBox.collisionTest(pp, collisionInfo);
+                    if (collided) {
+                        platBox.removeFromSet(platBox.getObjectAt(j));
+                        p.removeFromSet(p.getObjectAt(m));
                     }
                 }
-            }   
+            }
         }
-        
-        
-        //minion bullet shoot the defender 
-        for(i=0 ; i<this.mAllMinions.size();i++){
-        var platBox = this.mAllMinions.getObjectAt(i).getProjectiles();
-        for (j = 0; j < platBox.size(); j++) {
-            var pBox = platBox.getObjectAt(j).getRigidBody();
-                
-                collided = this.SpaceShip.mDefender.getRigidBody().collisionTest(pBox, collisionInfo);
-                if (collided) {
-                    platBox.removeFromSet(platBox.getObjectAt(j));
-                }
-                
-        
-        }   
     }
-    
-        //minion bullets shoot the spaceship
-    
-        for(i=0 ; i<this.mAllMinions.size();i++){
-        var platBox = this.mAllMinions.getObjectAt(i).getProjectiles();
-        for (j = 0; j < platBox.size(); j++) {
-            var pBox = platBox.getObjectAt(j).getRigidBody();
-                collided = this.Cheat.getRigidBody().collisionTest(pBox, collisionInfo);
-                if (collided) {
-                    platBox.removeFromSet(platBox.getObjectAt(j));
-                    this.bloodBar.setBarlen(2);
-                }
-            }   
-        }
-    
 
-        //minion bullet shoot the walls 
-        for(i=0 ; i<this.mAllMinions.size();i++){
+
+    //minion bullet shoot the defender
+    for (i = 0; i < this.mAllMinions.size(); i++) {
         var platBox = this.mAllMinions.getObjectAt(i).getProjectiles();
         for (j = 0; j < platBox.size(); j++) {
             var pBox = platBox.getObjectAt(j).getRigidBody();
-                for (m=0;m<this.AllWalls.size();m++)
-                {   
+
+            collided = this.SpaceShip.mDefender.getRigidBody().collisionTest(pBox, collisionInfo);
+            if (collided) {
+                platBox.removeFromSet(platBox.getObjectAt(j));
+            }
+
+
+        }
+    }
+
+    //minion bullets shoot the spaceship
+
+    for (i = 0; i < this.mAllMinions.size(); i++) {
+        var platBox = this.mAllMinions.getObjectAt(i).getProjectiles();
+        for (j = 0; j < platBox.size(); j++) {
+            var pBox = platBox.getObjectAt(j).getRigidBody();
+            collided = this.Cheat.getRigidBody().collisionTest(pBox, collisionInfo);
+            if (collided) {
+                platBox.removeFromSet(platBox.getObjectAt(j));
+                this.bloodBar.setBarlen(2);
+            }
+        }
+    }
+
+
+    //minion bullet shoot the walls
+    for (i = 0; i < this.mAllMinions.size(); i++) {
+        var platBox = this.mAllMinions.getObjectAt(i).getProjectiles();
+        for (j = 0; j < platBox.size(); j++) {
+            var pBox = platBox.getObjectAt(j).getRigidBody();
+            for (m = 0; m < this.AllWalls.size(); m++) {
                 collided = this.AllWalls.getObjectAt(m).getRigidBody().collisionTest(pBox, collisionInfo);
                 if (collided) {
-                            platBox.removeFromSet(platBox.getObjectAt(j));
+                    platBox.removeFromSet(platBox.getObjectAt(j));
                 }
             }
-        }   
+        }
     }
-    
-        //minion bullet shoot the doors 
-        for(i=0 ; i<this.mAllMinions.size();i++){
+
+    //minion bullet shoot the doors
+    for (i = 0; i < this.mAllMinions.size(); i++) {
         var platBox = this.mAllMinions.getObjectAt(i).getProjectiles();
         for (j = 0; j < platBox.size(); j++) {
             var pBox = platBox.getObjectAt(j).getRigidBody();
-                for (m=0;m<this.mAllDoors.size();m++)
-                {
+            for (m = 0; m < this.mAllDoors.size(); m++) {
                 collided = this.mAllDoors.getObjectAt(m).getRigidBody().collisionTest(pBox, collisionInfo);
                 if (collided) {
-                            platBox.removeFromSet(platBox.getObjectAt(j));
+                    platBox.removeFromSet(platBox.getObjectAt(j));
                 }
             }
-        
-        }   
+
+        }
     }
-    
-        //spaceship touch the walls 
-        for(i=0 ; i<this.AllWalls.size();i++){
+
+    //spaceship touch the walls
+    for (i = 0; i < this.AllWalls.size(); i++) {
         var platBox = this.AllWalls.getObjectAt(i).getRigidBody();
-                collided = this.Cheat.getRigidBody().collisionTest(platBox, collisionInfo);
-                if (collided) {
-                            if(this.bloodcourt<=1){
-                            this.bloodBar.setBarlen(0.2);
-                            this.bloodcourt = 5;
-                            this.mCamera.shake(1,1,3,5);
-                        }
-                        else{
-                            this.bloodcourt--;
-                        }
-                    }
-                }
-        
-        //spaceship bullet shoot the walls
-        for (i = 0; i < 4; i++) {
+        collided = this.Cheat.getRigidBody().collisionTest(platBox, collisionInfo);
+        if (collided) {
+            if (this.bloodcourt <= 1) {
+                this.bloodBar.setBarlen(0.2);
+                this.bloodcourt = 5;
+                this.mCamera.shake(1, 1, 3, 5);
+            }
+            else {
+                this.bloodcourt--;
+            }
+        }
+    }
+
+    //spaceship bullet shoot the walls
+    for (i = 0; i < 4; i++) {
         var platBox = this.SpaceShip.getShipWeapon()[i].getProjectiles();
-        for(j=0 ; j<platBox.size();j++){
-        var pp = platBox.getObjectAt(j).getRigidBody();
-        for (m = 0; m < this.AllWalls.size(); m++) {
+        for (j = 0; j < platBox.size(); j++) {
+            var pp = platBox.getObjectAt(j).getRigidBody();
+            for (m = 0; m < this.AllWalls.size(); m++) {
                 collided = this.AllWalls.getObjectAt(m).getRigidBody().collisionTest(pp, collisionInfo);
                 if (collided) {
-                            platBox.removeFromSet(platBox.getObjectAt(j));      
-                    }
-                }   
+                    platBox.removeFromSet(platBox.getObjectAt(j));
+                }
             }
         }
-        
-        //spaceship bullet shoot the doors
-        for (i = 0; i < 4; i++) {
+    }
+
+    //spaceship bullet shoot the doors
+    for (i = 0; i < 4; i++) {
         var platBox = this.SpaceShip.getShipWeapon()[i].getProjectiles();
-        for(j=0 ; j<platBox.size();j++){
-        var pp = platBox.getObjectAt(j).getRigidBody();
-        for (m = 0; m < this.mAllDoors.size(); m++) {
+        for (j = 0; j < platBox.size(); j++) {
+            var pp = platBox.getObjectAt(j).getRigidBody();
+            for (m = 0; m < this.mAllDoors.size(); m++) {
                 collided = this.mAllDoors.getObjectAt(m).getRigidBody().collisionTest(pp, collisionInfo);
                 if (collided) {
-                            platBox.removeFromSet(platBox.getObjectAt(j));      
-                    }
-                }   
+                    platBox.removeFromSet(platBox.getObjectAt(j));
+                }
             }
         }
-            
-        //spaceship bullet shoot the minions
-        for (i = 0; i < 4; i++) {
-        var platBox = this.SpaceShip.getShipWeapon()[i].getProjectiles();
-        for(j=0 ; j<platBox.size();j++){
-        var pp = platBox.getObjectAt(j).getRigidBody();
-        for (m = 0; m < this.mAllMinions.size(); m++) {
-                collided = this.mAllMinions.getObjectAt(m).getRigidBody().collisionTest(pp, collisionInfo);
-                if (collided) {                            
-                            this.mAllMinions.getObjectAt(m).HP -= platBox.getObjectAt(j).damage;
-                            if (this.mAllMinions.getObjectAt(m).HP <= 0)
-                            {
-                                this.mAllobjs.removeFromSet(this.mAllMinions.getObjectAt(m));
-                                this.mAllMinions.removeFromSet(this.mAllMinions.getObjectAt(m));
-                            }
-                            platBox.removeFromSet(platBox.getObjectAt(j));
-                        }
-                    }   
-                }
-            }
-    
-        //coin spaceship
-            for(i = 0;i<(this.mAllCoins.size()-3);i++){
-                var platBox = this.mAllCoins.getObjectAt(i).getRigidBody();
-                collided = this.Cheat.getRigidBody().collisionTest(platBox, collisionInfo);
-                if (collided) {
-                            this.mAllobjs.removeFromSet(this.mAllCoins.getObjectAt(i));
-                            this.mAllCoins.removeFromSet(this.mAllCoins.getObjectAt(i));
+    }
 
-                            this.produceMinions(3);    
+    //spaceship bullet shoot the minions
+    for (i = 0; i < 4; i++) {
+        var platBox = this.SpaceShip.getShipWeapon()[i].getProjectiles();
+        for (j = 0; j < platBox.size(); j++) {
+            var pp = platBox.getObjectAt(j).getRigidBody();
+            for (m = 0; m < this.mAllMinions.size(); m++) {
+                collided = this.mAllMinions.getObjectAt(m).getRigidBody().collisionTest(pp, collisionInfo);
+                if (collided) {
+                    this.mAllMinions.getObjectAt(m).HP -= platBox.getObjectAt(j).damage;
+                    if (this.mAllMinions.getObjectAt(m).HP <= 0) {
+                        gEngine.AudioClips.playACue(this.aBoom_enemyCue);
+                        this.mAllobjs.removeFromSet(this.mAllMinions.getObjectAt(m));
+                        this.mAllMinions.removeFromSet(this.mAllMinions.getObjectAt(m));
+                    }
+                    platBox.removeFromSet(platBox.getObjectAt(j));
                 }
             }
-    
+        }
+    }
+
+    //coin spaceship
+    for (i = 0; i < (this.mAllCoins.size() - 3); i++) {
+        var platBox = this.mAllCoins.getObjectAt(i).getRigidBody();
+        collided = this.Cheat.getRigidBody().collisionTest(platBox, collisionInfo);
+        if (collided) {
+            gEngine.AudioClips.playACue(this.aCoinCue);
+            this.mAllobjs.removeFromSet(this.mAllCoins.getObjectAt(i));
+            this.mAllCoins.removeFromSet(this.mAllCoins.getObjectAt(i));
+            for(var i=0;i<=20;i++){
+                            if(i ===20){
+                                gEngine.AudioClips.playACue(this.aWarningCue);       
+                        }
+                    }
+            this.produceMinions(2);
+        }
+    }
+
+
+    //cabbot spaceship
+    for (i = 0; i < this.mAllBloodpacks.size(); i++) {
+        var platBox = this.mAllBloodpacks.getObjectAt(i).getRigidBody();
+        collided = this.Cheat.getRigidBody().collisionTest(platBox, collisionInfo);
+        if (collided) {
+            gEngine.AudioClips.playACue(this.aCoinCue);
+            this.mAllobjs.removeFromSet(this.mAllBloodpacks.getObjectAt(i));
+            this.mAllBloodpacks.removeFromSet(this.mAllBloodpacks.getObjectAt(i));
+            if (this.bloodBar.getBloodLen() + 10 > 36) {
+                var deltabar = 36 - this.bloodBar.getBloodLen();
+                this.bloodBar.setBarlen(-deltabar);
+            }
+            else {
+                this.bloodBar.setBarlen(-10);
+            }
+        }
+    }
+
+    //bomb spaceship
+    if(this.bloodBar.getBloodLen()<=0){
+         gEngine.AudioClips.playACue(this.aBoomCue);
+         this.lose = true;
+         gEngine.GameLoop.stop();
         
-        //cabbot spaceship
-            for(i = 0;i<this.mAllBloodpacks.size();i++){
-                var platBox = this.mAllBloodpacks.getObjectAt(i).getRigidBody();
-                collided = this.Cheat.getRigidBody().collisionTest(platBox, collisionInfo);
-                if (collided) {
-                            this.mAllobjs.removeFromSet(this.mAllBloodpacks.getObjectAt(i));
-                            this.mAllBloodpacks.removeFromSet(this.mAllBloodpacks.getObjectAt(i));
-                            if(this.bloodBar.getBloodLen()+10 > 36){
-                                var deltabar = 36 -this.bloodBar.getBloodLen()-10;
-                                this.bloodBar.setBarlen(deltabar);
-                        }
-                        else{
-                            this.bloodBar.setBarlen(-10);
-                        }
-                }
-            }
-                
-        //bomb spaceship
-            for(i = 0;i<this.mAllBooms.size();i++){
-                var platBox = this.mAllBooms.getObjectAt(i).getRigidBody();
-                collided = this.Cheat.getRigidBody().collisionTest(platBox, collisionInfo);
-                if (collided) {
-                            this.mAllobjs.removeFromSet(this.mAllBooms.getObjectAt(i));
-                            this.mAllBooms.removeFromSet(this.mAllBooms.getObjectAt(i));
-                            this.bloodBar.setBarlen(10); 
-                }
-            }
+    }
+    for (i = 0; i < this.mAllBooms.size(); i++) {
+        var platBox = this.mAllBooms.getObjectAt(i).getRigidBody();
+        collided = this.Cheat.getRigidBody().collisionTest(platBox, collisionInfo);
+        if (collided) {
+            gEngine.AudioClips.playACue(this.aBoomCue);
+            this.mAllobjs.removeFromSet(this.mAllBooms.getObjectAt(i));
+            this.mAllBooms.removeFromSet(this.mAllBooms.getObjectAt(i));
+            this.bloodBar.setBarlen(7);
+        }
+    }
 
 
 
@@ -539,8 +581,8 @@ SaveRabbits.prototype.update = function(){
 
     var Pos = this.Cheat.getXform().getPosition();
             //coin chase the camera   
-        var delta = 0;
-        for(var i = (this.mAllCoins.size()-3) ; i<this.mAllCoins.size() ; i++)
+    var delta = 0;
+    for(var i = (this.mAllCoins.size()-3) ; i<this.mAllCoins.size() ; i++)
     {
         this.mAllCoins.getObjectAt(i).getXform().setPosition(Pos[0]-48+delta,Pos[1]+29);
         delta+=5;
@@ -573,14 +615,16 @@ SaveRabbits.prototype.draw = function(){
     this.mAllButtons.draw(this.mCamera);
 
     this.mAllMinions.draw(this.mCamera);
-    this.mAllParticles.draw(this.mCamera);
+
+    this.winDoor.draw(this.mCamera);  
     this.SpaceShip.draw(this.mCamera,this.Cheat);
+    this.mAllParticles.draw(this.mCamera);
     this.mRabbit1.draw(this.mCamera);
     this.mRabbit2.draw(this.mCamera);
     this.bloodBar.draw(this.mCamera);
     this.mAllBloodpacks.draw(this.mCamera);
     this.mAllBooms.draw(this.mCamera);
-    this.winDoor.draw(this.mCamera);   
+ 
     
     for(var i = 0 ; i<3 ; i++)
     {
