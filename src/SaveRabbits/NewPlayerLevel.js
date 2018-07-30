@@ -454,8 +454,8 @@ NewPlayerLevel.prototype.showTipsTexture = function(showTips,op){
                  break;
             case 3:
             case 4:
-                 this.mTips2Texture.draw(this.mCamera);
-                 break;
+                this.mTips1Texture.draw(this.mCamera);
+                break;
             case 5:
                  this.mTips1Texture.draw(this.mCamera);
                  break;
@@ -463,8 +463,8 @@ NewPlayerLevel.prototype.showTipsTexture = function(showTips,op){
                  this.mTips3Texture.draw(this.mCamera);
                  break;
             case 7:
-                 this.mTips2Texture.draw(this.mCamera);
-                 break;
+                this.mTips1Texture.draw(this.mCamera);
+                break;
             case 8:
                  this.mTips4Texture.draw(this.mCamera);
                  break;
@@ -478,8 +478,8 @@ NewPlayerLevel.prototype.showTipsTexture = function(showTips,op){
                  break;
             case 3:
             case 4:
-                 this.mTips2Texture.getXform().setPosition(this.shipPos[0]+45, this.shipPos[1]+25);
-                 break;
+                this.mTips1Texture.getXform().setPosition(this.shipPos[0]+45, this.shipPos[1]+25);
+                break;
             case 5:
                  this.mTips1Texture.getXform().setPosition(this.shipPos[0]+45, this.shipPos[1]+25);
                  break;
@@ -487,8 +487,8 @@ NewPlayerLevel.prototype.showTipsTexture = function(showTips,op){
                  this.mTips3Texture.getXform().setPosition(this.shipPos[0]-40, this.shipPos[1]+25);
                  break;
             case 7:
-                 this.mTips2Texture.getXform().setPosition(this.shipPos[0]+45, this.shipPos[1]+25);
-                 break;
+                this.mTips1Texture.getXform().setPosition(this.shipPos[0]+45, this.shipPos[1]+25);
+                break;
             case 8:
                  this.mTips4Texture.getXform().setPosition(this.shipPos[0]-45, this.shipPos[1]+25);
                  break;
@@ -514,9 +514,9 @@ NewPlayerLevel.prototype.showTips = function (showTips){
             this.highlightstate = 0;
             break;
         case 3:
-            this.setText("Move to the position of the highlight area:",this.shipPos[0]+25,this.shipPos[1]+33);
-            this.setText("[G] to gain or lose control for player 1",this.shipPos[0]+25,this.shipPos[1]+30);
-            this.setText("[.] to gain or lose control for player 2",this.shipPos[0]+25,this.shipPos[1]+27);
+            this.setText("Move to the position of the highlight area:",this.shipPos[0]+23,this.shipPos[1]+33);
+            this.setText("[G] to gain or lose control for p1",this.shipPos[0]+23,this.shipPos[1]+30);
+            this.setText("[.] to gain or lose control for p2",this.shipPos[0]+23,this.shipPos[1]+27);
             this.setText("",this.shipPos[0]+25,this.shipPos[1]+24);
             this.setText("Press [ENTER] to continue..",this.shipPos[0]+25,this.shipPos[1]+21);
             this.setText("",this.shipPos[0]+25,this.shipPos[1]+18);
@@ -528,26 +528,26 @@ NewPlayerLevel.prototype.showTips = function (showTips){
             this.setText("[A,D] to rotate for player 1",this.shipPos[0]+25,this.shipPos[1]+30);
             this.setText("[Left,Right] to rotate for player 2",this.shipPos[0]+25,this.shipPos[1]+27);
             this.setText("",this.shipPos[0]+25,this.shipPos[1]+24);
-            this.setText("Press [ENTER] to ",this.shipPos[0]+25,this.shipPos[1]+21);
-            this.setText("continue..",this.shipPos[0]+25,this.shipPos[1]+18);
+            this.setText("Press [ENTER] to continue..",this.shipPos[0]+25,this.shipPos[1]+21);
+            this.setText("",this.shipPos[0]+25,this.shipPos[1]+18);
             this.highlightstate = 0;
             break;
         case 5:
             this.setText("Use weapons to kill the minion:",this.shipPos[0]+25,this.shipPos[1]+33);
             this.setText("gain the control and rotate it",this.shipPos[0]+25,this.shipPos[1]+30);
-            this.setText("[F] to shoot bullets for player 1",this.shipPos[0]+25,this.shipPos[1]+27);
-            this.setText("[,] to shoot bullets for player 2" ,this.shipPos[0]+25,this.shipPos[1]+24);
-            this.setText("",this.shipPos[0]+25,this.shipPos[1]+21);
-            this.setText("press [ENTER] to continue..",this.shipPos[0]+25,this.shipPos[1]+18);
+            this.setText("[F] to shoot bullets for p1",this.shipPos[0]+25,this.shipPos[1]+27);
+            this.setText("[,] to shoot bullets for p2" ,this.shipPos[0]+25,this.shipPos[1]+24);
+            this.setText("press [ENTER] to continue..",this.shipPos[0]+25,this.shipPos[1]+21);
+            this.setText("",this.shipPos[0]+25,this.shipPos[1]+18);
             this.highlightstate = 2;
             break;
         case 6:
             this.setText("Use Propeller to move the spaceship:",this.shipPos[0]-60,this.shipPos[1]+33);
             this.setText("gain control and rotate it",this.shipPos[0]-60,this.shipPos[1]+30);
-            this.setText("[F] to start Propeller for player 1",this.shipPos[0]-60,this.shipPos[1]+27);
-            this.setText("[,] to start Propeller for player 2" ,this.shipPos[0]-60,this.shipPos[1]+24);
-            this.setText("",this.shipPos[0]-60,this.shipPos[1]+21);
-            this.setText("press [ENTER] to continue..",this.shipPos[0]-60,this.shipPos[1]+18);
+            this.setText("      [F] to start Propeller for p1",this.shipPos[0]-60,this.shipPos[1]+27);
+            this.setText("          [,] to start Propeller " ,this.shipPos[0]-60,this.shipPos[1]+24);
+            this.setText("          for p2",this.shipPos[0]-60,this.shipPos[1]+21);
+            this.setText("        press [ENTER] to continue..",this.shipPos[0]-60,this.shipPos[1]+18);
             this.highlightstate = 3;
             break;
         case 7:
@@ -562,8 +562,8 @@ NewPlayerLevel.prototype.showTips = function (showTips){
             this.setText("Move and go to the door:",this.shipPos[0]-65,this.shipPos[1]+35);
             this.setText("If you have collected all the coins",this.shipPos[0]-65,this.shipPos[1]+32);
             this.setText("You can pass the level",this.shipPos[0]-65,this.shipPos[1]+29);
-            this.setText("" ,this.shipPos[0]-65,this.shipPos[1]+26);
-            this.setText("Let's go!",this.shipPos[0]-65,this.shipPos[1]+23);
+            this.setText("Let's go!" ,this.shipPos[0]-65,this.shipPos[1]+26);
+            this.setText("",this.shipPos[0]-65,this.shipPos[1]+23);
             this.highlightstate = 0;
             break;
     }
