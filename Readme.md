@@ -14,7 +14,7 @@ Your goal is to collect coins and defeat the monsters.
 >[Save Rabbits](https://xjdkc.github.io/SaveRabbits)
 
 **Here is the game clearance demonstration video**
->[Game Clearance Demostration Video](https://www.bilibili.com/video/av28214017)
+>[Game Clearance Demostration Video](https://www.bilibili.com/video/av28214017/)
 
 
 ## Control
