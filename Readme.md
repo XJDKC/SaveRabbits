@@ -29,7 +29,7 @@ Your goal is to collect coins and defeat the monsters.
 * 2018 NUS Summer Workshop Soc SWS3007 - Group 3
 * Group Name    : Fantastic Four
 * Professor     : Kelvin Sung
-* Groump Member :
+* Group Members :
     + SCU Dong Chaopeng
     + SCU Zhang Huan
     + HUST Xing  Rulin
